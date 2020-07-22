@@ -1,0 +1,26 @@
+# first make sure to remove your current virtualbox
+sudo apt purge virtualbox
+
+# next, add the repository to your sources
+sudo add-apt-repository "deb http://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib"
+
+# add public keys to verify downloads
+wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add -
+wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
+
+# now update to complete the process of adding the repository
+sudo apt update
+
+# install dkms if you haven't already
+sudo apt install dkms
+
+# install virtualbox; change version number as needed
+sudo apt install virtualbox-5.0
+
+# make sure no VMs are running when you do this or it will fail
+# and make sure to replace /path/to/ext-pack with the actual path to the downloaded extension pack ?
+vboxmanage extpack install --replace /path/to/ext-pack
+
+
+taken from :
+https://askubuntu.com/questions/41478/how-do-i-install-the-virtualbox-version-from-oracle-to-install-an-extension-pack
