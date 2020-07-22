@@ -1,0 +1,10 @@
+ first.vm.provision "shell",
+        run:"always",
+        inline:"/bin/sh /home/apcuser/images/edithost.sh addhost fab-ci-bamboo-svc 192.168.125.131"
+
+        first.vm.provision "shell",
+        inline: "/bin/sh /home/apcuser/images/load.sh"
+
+        first.vm.provision "shell",
+        run: "always",
+        inline:"/bin/bash /home/apcuser/images/bamboo_agent_script.sh"
