@@ -1,0 +1,63 @@
+Create your own vagrant box using packer templates .
+Chose Operation System 
+currently supported :
+Windows ,Linux Ubuntu,Linux Suse,Linux Rhel
+
+<-------------------------------------------------------------------FOR WINDOWS -------------------------------------------------------------------------------> 
+go to 192.168.125.107 VM, go to below path
+/home/apcuser/packer_home/windows_home/makebox/windows_home/packer-windows
+chose your flavor, currently available:
+windows2012,windows7,windows8
+if Your choice is windows 7 64 bit Professional version
+then open windows_7.json file and edit below fields in it
+"iso_checksum": "your iso file's md5sum",(you have to download iso file from windows official site)
+"iso_url": "path to your iso file , put your downloaded windows iso image file in /home/apcuser/packer_home/windows_home/packer-windows/iso folder",
+Example:
+"iso_url": "iso/SW_DVD5_Win_Pro_7w_SP1_64BIT_English_MLF_X17-28603.ISO",
+finally enter tha command 
+ packer build -only=virtualbox-iso -var-file=windows_7.json
+output will be under
+Import this box into vagrant using 
+vagrant box add <box_name> <.box which is in output folder>
+<-------------------------------------------------------------------FOR LINUX -------------------------------------------------------------------------------> 
+
+<--------------------------------FOR UBUNTU---------------------------------------->
+go to 192.168.125.107 VM, go to below path
+/home/apcuser/packer_home/linux_home/ubuntu_home/ubuntu
+chose your flavor, currently supported : 
+ubuntu 12.04,ubuntu 14.04,ubuntu 16.04 , ubuntu 17.04
+if your choice is ubuntu 16.04 
+edit ubuntu1604.json and change below fields,
+"iso_checksum": "your iso file's sha1sum ",(you have to download iso file from ubuntu official website)",
+"iso_url": "path to your iso file ",
+example: in my case 
+i have placed iso file in current folder /home/apcuser/packer_home/ubuntu_home/ubuntu
+"iso_url": "./",
+"cpus": "16",
+"disk_size": "120536",
+"memory": "60440",
+This you can alter above is 16 core , 120gig hard disk size and 60 gig ram size(Edit whatever numbers you want).
+finally enter tha command 
+ packer build -only=virtualbox-iso -var-file=ubuntu1604.json ubuntu.json
+output will be under /packer_home/linux_home/ubuntu_home/ubuntu/box/virtualbox
+Import this box into vagrant using 
+vagrant box add <box_name> <.box which is in output folder>
+example:
+vagrant box add myRHELbox ubuntu-16.04-virtualbox.box
+<--------------------------------FOR UBUNTU---------------------------------------->
+<--------------------------------FOR RHEL---------------------------------------->
+go to 192.168.125.107 VM, go to below path
+/home/apcuser/packer_home/linux_home/rhel_home/bento/rhel
+edit rhel-7.4-x86_64.json and change below fields,
+ "mirror": "/home/apcuser/vagrant_home/rhel_home/bento/rhel/iso/rhel/rhel-server-7.3-x86_64-dvd.iso",(path of downloaded iso file in rhel folder)
+"iso_checksum": "120acbca7b3d55465eb9f8ef53ad7365f2997d42d4f83d7cc285bf5c71e1131f", (sha256 checksum of  downloaded iso file)
+finally enter tha command 
+ packer build -only=virtualbox-iso -var-file=rhel-7.4-x86_64.json
+output will be under /packer_home/linux_home/rhel_home/bento/builds
+Import this into vagrant using 
+vagrant box add <box_name> <.box which is in output folder>
+example:
+vagrant box add myRHELbox rhel-7.4.virtualbox.box
+<--------------------------------FOR RHEL---------------------------------------->
+
+<-------------------------------------------------------------------FOR LINUX -------------------------------------------------------------------------------> 
