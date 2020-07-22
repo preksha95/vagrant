@@ -1,0 +1,15 @@
+REPACKING:
+
+ssh to the VM  you want to repack,
+sudo apt-get clean
+sudo dd if=/dev/zero of=/EMPTY bs=1M
+sudo rm -f /EMPTY
+cat /dev/null > ~/.bash_history && history -c && exit
+
+go to that folder where VM is running, 
+vagrant package --output mynew.box
+vagrant box add mynewbox mynew.box
+
+use mynewbox as box name when bringing up a VM in future.
+
+
