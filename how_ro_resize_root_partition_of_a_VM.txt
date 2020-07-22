@@ -1,0 +1,59 @@
+increase vagrant root partition --
+
+vagrant halt (halt the VM before doing anything)
+cd /path/where/your/vbox/.vmdk/files/are
+(This is the path where virtualbox stores your VM s data : /home/apcuser/Virtual VMs/)
+VBoxManage clonehd my.vmdk out.vdi --format VDI
+VBoxManage modifyhd out.vdi --resize 51200 (50gig , mention here how much you want)
+
+VBoxManage storageattach <VM_NAME> --storagectl "SATA Controller" --port 0 --device 0 --type hdd --medium out.vdi
+(This will attach the newly formed hard disk into your VM and replace the existing one)
+    
+vagrant up
+agrant ssh
+sudo cfdisk /dev/sda
+press New ENTER WRITE yes QUIT
+exit
+vagrant reload
+vagrant ssh
+sudo pvcreate /dev/sda3
+sudo pvdisplay
+at this point newly created /dev/sda3 won't have any VG_NAME, take the VG_NAME associated with root partition 
+check with df -h and take that name 
+example:
+apcuser@fab-ci-compute-h1:~$ df -h
+Filesystem                         Size  Used Avail Use% Mounted on
+udev                                30G     0   30G   0% /dev
+tmpfs                              5.9G  9.2M  5.9G   1% /run
+/dev/mapper/esx--it--08--vg-root   141G   21G  113G  16% /
+tmpfs                               30G     0   30G   0% /dev/shm
+tmpfs                              5.0M     0  5.0M   0% /run/lock
+tmpfs                               30G     0   30G   0% /sys/fs/cgroup
+/dev/sda1                          472M   58M  391M  13% /boot
+vagrant                            1.5T  952G  567G  63% /vagrant
+home_apcuser_images                1.5T  952G  567G  63% /home/apcuser/images
+home_apcuser_cephsync              1.5T  952G  567G  63% /home/apcuser/cephsync
+home_apcuser_LargeFilesRepository  1.5T  952G  567G  63% /home/apcuser/LargeFilesRepository
+tmpfs                              5.9G     0  5.9G   0% /run/user/1001
+
+now check with sudo pvdisplay
+apcuser@fab-ci-compute-h1:~$ sudo pvdisplay
+  --- Physical volume ---
+  PV Name               /dev/sda5
+  VG Name               esx-it-08-vg
+  PV Size               146.53 GiB / not usable 2.00 MiB
+  Allocatable           yes (but full)
+  PE Size               4.00 MiB
+  Total PE              37511
+  Free PE               0
+  Allocated PE          37511
+  PV UUID               jUdzCM-eaAP-w3YM-gsH7-FRdI-6WRX-PJks0n
+so  VG Name               esx-it-08-vg , take this vg name.
+sudo vgextend <VG_NAME of root> /dev/sda3
+sudo vgextend esx-it-08-vg /dev/sda3
+
+sudo lvextend /dev/ esx-it-08-vg/root /dev/sda3
+sudo resize2fs /dev/ esx-it-08-vg/root
+check if your newly configured space is available in hard disk
+df -h
+Then follow normal vagrant repack procedure to repack this new box
