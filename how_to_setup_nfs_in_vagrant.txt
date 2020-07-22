@@ -1,0 +1,58 @@
+AT NFS SERVER node:
+Bring up a VM with lots of hard disk (in TBs)
+and minimum cpu and ram (2 cores, 8 gb)
+
+install NFS server on this VM, follow below steps:
+
+-->install the nfs server package
+apt-get install nfs-kernel-server
+
+-->Let's say we want to SHARE a directory in this VM /home/apcuser/demofolder ,
+#sudo mkdir -p /export/apcuser_demofolder
+It's important that /export and /export/apcuser_demofolder have 777 permissions as we will be accessing the 
+sudo chmod 777 -R /export
+sudo chmod 777 -R /export/apcuser_demofolder
+
+-->NFS share from the client without LDAP/NIS authentication. 
+#sudo  mount --bind /home/apcuser/demofolder /export/apcuser_demofolder
+
+
+-->To save us from retyping this after every reboot we add the following
+line to /etc/fstab
+ /home/apcuser/demofolder   /export/apcuser_demofolder   none    bind  0  0
+
+-->To export our directories to a local network 192.168.125.123/24 we add the following two lines to /etc/exports
+/export       192.168.125.123/24(rw,fsid=0,insecure,no_subtree_check,async)
+/export/apcuser_demofolder 192.168.125.123/24(rw,nohide,insecure,no_subtree_check,async)
+
+-->Now add the following line to /etc/hosts.allow:
+rpcbind mountd nfsd statd lockd rquotad : 192.168.125.123 127.0.0.1
+Note: Ensure that the list of authorised IP addresses includes the localhost address (127.0.0.1) as the startup scripts in 
+recent versions of Ubuntu use the rpcinfo command to discover NFSv3 support, 
+and this will be disabled if localhost is unable to connect.
+
+
+-->Now restart the service
+# service nfs-kernel-server restart
+
+
+
+at NFS CLIENT NODE (192.168.125.123):
+any vm present in nfs server's network  can be a nfs client
+-->Install the required packages:
+#sudo apt-get install nfs-common 
+-->Now  mount it.
+# sudo mount -t nfs -o proto=tcp,port=2049 <nfs-server-IPAddress>:/export/apcuser_demofolder /home/apcuser/demo_nfs_sharing_demofolder
+
+-->To save us from retyping this after every reboot we add the following line to /etc/fstab:
+<nfs-server-IP>:/   /mnt   nfs    auto  0  0
+If after mounting, the entry in /proc/mounts appears as <nfs-server-IP>:// (with two slashes), then you might need to 
+specify two slashes in /etc/fstab, or else umount might complain that it cannot find the mount.
+The auto option mounts on startup.However this will not work if your client uses a wifi connection managed at the user 
+level (after login), because the network will not be available at boot time. In Ubuntu 12.04 LTS and later, 
+wifi connections are managed at the system level by default, so auto-mounting of NFS shares at boot time should work fine.
+Ubuntu Server doesn't come with any init.d/netfs or other scripts to do this for you.
+
+-->Now add the following line to /etc/hosts.allow:
+rpcbind : NFS server IP address
+
