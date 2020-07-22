@@ -1,0 +1,51 @@
+
+"virtual box installation"
+https://tecadmin.net/install-oracle-virtualbox-on-ubuntu/
+
+install vagrant 
+
+vagrant init <deploy_box>//downloads image file rom internet
+ex:  vagrant init ubuntu/xenial-64
+
+edit vagrant file
+vagrant up
+
+
+vagrant ssh
+
+
+
+sudo useradd -d /home/apcuser -m apcuser   
+sudo passwd apcuser   
+echo "apcuser ALL = (root) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/apcuser   
+sudo chmod 0440 /etc/sudoers.d/apcuser
+
+
+modify this file sudo vi /etc/passwd 
+
+"perform repack"
+REPACKING:
+
+ssh to the VM  you want to repack,
+sudo apt-get clean
+sudo dd if=/dev/zero of=/EMPTY bs=1M
+sudo rm -f /EMPTY
+cat /dev/null > ~/.bash_history && history -c && exit
+
+go to that folder where VM is running, 
+vagrant package --output mynew.box
+vagrant box add mynewbox mynew.box
+
+use mynewbox as box name when bringing up a VM in future.
+
+
+
+
+"to list all  the running vms in virtual box"
+VBoxManage list vms
+
+"to powerOff vms"
+VBoxManage controlvm <uuid> poweroff
+
+
+
